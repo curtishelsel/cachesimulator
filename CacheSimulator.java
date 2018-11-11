@@ -18,20 +18,24 @@ public class CacheSimulator{
 	private int write;
 	private int read;
 
+	// Constructor that reads from the file and calls to simulate the cache
+	// with every memory access.
 	public CacheSimulator (String[] args){
 
 		cache = new Cache(args[0], args[1], args[2], args[3]);
 		
 		try{
-
 			Scanner in = new Scanner(new File(args[4]));
 			
 			while(in.hasNext()){
 
+				// For each line, pull the operation and address and
+				// create a new memory access object.
 				String op = in.next();
 				String add = in.next();
 				MemoryAccess m = new MemoryAccess(op, add);
 				
+				// Set the set number and tag for each memory access.
 				m.setSetNumber(cache.getBlockSize());
 				m.setTag(cache.getNumSets());
 			
@@ -43,6 +47,7 @@ public class CacheSimulator{
 		}
 	}
 
+	// 
 	public void LRU(int index, int setNumber){
 
 		for(int j = 0; j < cache.getAssoc(); j++){
@@ -66,6 +71,12 @@ public class CacheSimulator{
 
 		LRU(index, m.getSetNumber());
 		cache.getCacheArray()[m.getSetNumber()][index] = m.getTag();
+
+		if(cache.getDirty()[m.getSetNumber()][index] == 1){
+			write++;
+		}
+
+		cache.getDirty()[m.getSetNumber()][index] = 0;
 
 		if(m.getOperationType().equals("W")){
 			checkWritePolicy(m.getSetNumber(), index);
@@ -95,7 +106,6 @@ public class CacheSimulator{
 
 	void checkWritePolicy(int setNumber, int index){
 		if(cache.getWBPolicy()){
-			read++;
 			cache.getDirty()[setNumber][index] = 1;
 		}
 		else{
@@ -117,7 +127,6 @@ public class CacheSimulator{
 				if(m.getOperationType().equals("W")){
 					checkWritePolicy(m.getSetNumber(), i);
 				}
-				//dirty bit
 				return;
 			}
 		}
@@ -135,10 +144,9 @@ public class CacheSimulator{
 	}
 
 	public void printStatistics(){
-		
-		System.out.println((double) miss/(miss + hit));
-		System.out.println(write);
-		System.out.println(read);
+		System.out.println("Miss Ratio: " + (float) miss/(miss + hit));
+		System.out.println("Number of writes: " + write);
+		System.out.println("Number of reads: " + read);
 	}
 
 	public static void main(String[] args){
