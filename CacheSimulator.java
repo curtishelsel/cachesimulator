@@ -24,8 +24,6 @@ public class CacheSimulator{
 		memAcc = new ArrayList<MemoryAccess>();
 		cache = new Cache(args[0], args[1], args[2], args[3]);
 		
-		
-
 		try{
 
 			Scanner in = new Scanner(new File(args[4]));
@@ -38,17 +36,16 @@ public class CacheSimulator{
 				
 				m.setSetNumber(cache.getBlockSize());
 				m.setTag(cache.getNumSets());
-				
-				memAcc.add(m);
+			
+				simulate(m);
 			}
-
 		}
 		catch(FileNotFoundException ex){
 			System.out.println(ex.toString());
 		}
 	}
 
-	public void updateLRU(int setNumber){
+	public int updateLRU(int setNumber){
 	
 		int index = 0;
 		int min = (int) cache.getAssoc();
@@ -62,13 +59,22 @@ public class CacheSimulator{
 		}
 
 		cache.getReplace()[setNumber][index] = (int) cache.getAssoc() - 1;
-		
+
+		if(setNumber == 6){
+			for(int i = 0; i < cache.getNumSets(); i++){
+
+		    	for(int j = 0; j < cache.getAssoc(); j++){
+		    		System.out.print(cache.getReplace()[i][j] + " "); 
+				}
+				System.out.println();
+        	}
+		}
+		return index;
 		
 	}
 
 	public void updateCache(int setNumber, BigInteger tag, String op){
 		
-		int index;
 		
 		for(int i = 0; i < cache.getAssoc(); i++){
 				if(cache.getCacheArray()[setNumber][i] == null){
@@ -109,34 +115,43 @@ public class CacheSimulator{
 		}
 		if(cache.getRPolicy().equals("LRU")){
 		
+			int index = updateLRU(setNumber);
+
+			if(cache.getDirty()[setNumber][index] == 1){
+				write++;
+			}
+			cache.getCacheArray()[setNumber][index] = tag;
+
+			if(op.equals("W")){
+				cache.getDirty()[setNumber][index] = 1;
+			}
+			else{
+				cache.getDirty()[setNumber][index] = 0;
+			}
+
 		}
 	}
 
-	public void simulate(){
-	
-		for(int i = 0; i < memAcc.size(); i++) {
-			
-			int setNumber = memAcc.get(i).getSetNumber();
-			BigInteger tag = memAcc.get(i).getTag();
+	public void simulate(MemoryAccess m){
+		
+		int setNumber = m.getSetNumber();
+		BigInteger tag = m.getTag();
 
-			for(int j = 0; j < cache.getAssoc(); j++){
+		for(int j = 0; j < cache.getAssoc(); j++){
 			
-				if(tag.equals(cache.getCacheArray()[setNumber][j])){
-					hit++;
-					// update lru
-					// update dirty bit
-
-					break;
-				}
-				else if(j == cache.getAssoc()-1){
-					miss++;
-					read++;
-					updateCache(setNumber, tag, memAcc.get(i).getOperationType());
-				}	
+			if(tag.equals(cache.getCacheArray()[setNumber][j])){
+				hit++;
+				// update lru
+				// update dirty bit
+				break;
 			}
-
-			
+			else if(j == cache.getAssoc()-1){
+				miss++;
+				read++;
+				updateCache(setNumber, tag, m.getOperationType());
+			}	
 		}
+			
 	}
 	public static void main(String[] args){
 		
@@ -149,9 +164,8 @@ public class CacheSimulator{
 
 		
 
-		cs.simulate();
 
-		//System.out.println(cs.miss);
+		System.out.println(cs.write);
 		//print statistics
 	}
 }
