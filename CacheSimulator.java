@@ -137,22 +137,23 @@ public class CacheSimulator{
 		}	
 		
 		cache.getReplace()[setNumber][index] = cache.getReplace()[setNumber].length - 1;
-		
-
 	}
 	
+
+	public void addLRU(MemoryAccess m){
+	
+	}
+
 	public void simulate(MemoryAccess m){
 		
-		int setNumber = m.getSetNumber();
-
 		for(int i = 0; i < cache.getAssoc(); i++){
 			
-			if(m.getTag().equals(cache.getCacheArray()[setNumber][i])){
+			if(m.getTag().equals(cache.getCacheArray()[m.getSetNumber()][i])){
 			
 				hit++;
 
 				if(cache.getRPolicy().equals("LRU")){
-					LRU(i, setNumber);
+					LRU(i, m.getSetNumber());
 				}
 
 				//dirty bit
@@ -162,7 +163,11 @@ public class CacheSimulator{
 			
 		miss++;
 		read++;
-		updateCache(setNumber, m.getTag(), m.getOperationType());
+
+		if(cache.getRPolicy().equals("LRU")){
+			addLRU(m);
+		}
+
 	}
 
 	public static void main(String[] args){
