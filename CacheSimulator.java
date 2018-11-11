@@ -68,27 +68,35 @@ public class CacheSimulator{
 		cache.getCacheArray()[m.getSetNumber()][index] = m.getTag();
 
 		if(m.getOperationType().equals("W")){
-			checkWritePolicy();
+			checkWritePolicy(m.getSetNumber(), index);
 		}
 	}
 
 	public void addFifo(MemoryAccess m){
 	
+		if(cache.getDirty()[m.getSetNumber()][0] == 1){
+			write++;
+		}
+
 		for(int i = 1; i < cache.getAssoc(); i++){
 			cache.getCacheArray()[m.getSetNumber()][i-1] = cache.getCacheArray()[m.getSetNumber()][i];
+			cache.getDirty()[m.getSetNumber()][i-1] = cache.getDirty()[m.getSetNumber()][i];
 		}		
 			
 		cache.getCacheArray()[m.getSetNumber()][cache.
 			getCacheArray()[m.getSetNumber()].length-1] = m.getTag();
 
+		cache.getDirty()[m.getSetNumber()][cache.getCacheArray()[m.getSetNumber()].length-1] = 0; 
+		
 		if(m.getOperationType().equals("W")){
-			checkWritePolicy();
+			checkWritePolicy(m.getSetNumber(), cache.getCacheArray()[m.getSetNumber()].length-1);
 		}
 	}
 
-	void checkWritePolicy(){
+	void checkWritePolicy(int setNumber, int index){
 		if(cache.getWBPolicy()){
 			read++;
+			cache.getDirty()[setNumber][index] = 1;
 		}
 		else{
 			write++;
@@ -107,7 +115,7 @@ public class CacheSimulator{
 				}
 
 				if(m.getOperationType().equals("W")){
-					checkWritePolicy();
+					checkWritePolicy(m.getSetNumber(), i);
 				}
 				//dirty bit
 				return;
