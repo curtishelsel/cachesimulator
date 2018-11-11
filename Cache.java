@@ -1,19 +1,54 @@
+import java.math.BigInteger;
+
 public class Cache{
 
-	private int size;
-	private int associativity;
+	private long size;
+	private long associativity;
+	private int numSets;
+	private static final int blockSize = 64;
 	private String replacementPolicy;
 	private boolean writeBackPolicy;
+	private BigInteger[][] cacheArray;
+	private int replace[][];
+	private int dirty[][];
 
-	public Cache(){
+	public Cache(String size, String associativity, String replacementPolicy, String writeBackPolicy){
 	
+		this.size = Long.parseLong(size);
+		this.associativity = Long.parseLong(associativity);
+
+		numSets = (int) (getSize() / (blockSize * getAssoc()));
+
+		cacheArray = new BigInteger[numSets][(int) this.associativity];
+		replace = new int[numSets][(int) this.associativity];
+	
+		for(int i = 0; i < numSets; i++){
+			for(int j = 0; j < this.associativity; j++){
+				replace[i][j] = j;
+			}   
+		}
+		dirty = new int[numSets][(int) this.associativity];
+
+		if(replacementPolicy.equals("1")){
+			this.replacementPolicy = "FIFO";
+		}
+		else{
+			this.replacementPolicy = "LRU";
+		}
+
+		if(writeBackPolicy.equals("1")){
+			this.writeBackPolicy = true;
+		}
+		else{
+			this.writeBackPolicy = false;
+		}
 	}
 
-	public int getSize(){
+	public long getSize(){
 		return size;
 	}
 
-	public int getAssoc(){
+	public long getAssoc(){
 		return associativity;
 	}
 
@@ -25,5 +60,22 @@ public class Cache{
 		return writeBackPolicy;
 	}
 
+	public int getNumSets(){
+		return numSets;
+	}
 
+	public int getBlockSize(){
+		return blockSize;
+	}
+	public BigInteger[][] getCacheArray(){
+		return cacheArray;
+	}
+
+	public int[][] getDirty(){
+		return dirty;
+	}
+	
+	public int[][] getReplace(){
+		return replace;
+	}
 }
