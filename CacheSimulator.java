@@ -47,21 +47,29 @@ public class CacheSimulator{
 		}
 	}
 
-	// 
+	// Method updates the least recently used array base on
+	// index being changed.
 	public void LRU(int index, int setNumber){
 
+		// Decrement all of the indices recently used place
 		for(int j = 0; j < cache.getAssoc(); j++){
 			cache.getReplace()[setNumber][j]--;
-		}	
+		}
 		
+		// Set the index to the highest recently used place 
+		// to be last in line for changes.
 		cache.getReplace()[setNumber][index] = cache.getReplace()[setNumber].length - 1;
 	}
 
+	// Method to add memory access based on least recently used
+	// replacement policy.
 	public void addLRU(MemoryAccess m){
 		
 		int index = 0;
 		int min = (int) cache.getAssoc();
 
+		// Locate the least recently used by finding the lowest
+		// index in the replacement array.
 		for(int i = 0; i < cache.getAssoc(); i++){
 			if(cache.getReplace()[m.getSetNumber()][i] < min){
 				min = cache.getReplace()[m.getSetNumber()][i];
@@ -69,15 +77,24 @@ public class CacheSimulator{
 			}
 		}
 
+		// Update the LRU array.
 		LRU(index, m.getSetNumber());
+		// Add the tag to the index of the least recently used tag.
 		cache.getCacheArray()[m.getSetNumber()][index] = m.getTag();
 
+		// For write-back, if the previous tag was a write,
+		// write the data back to memory. For write-through,
+		// all the dirty bits are automatically set to zero and
+		// will never increment the writes.
 		if(cache.getDirty()[m.getSetNumber()][index] == 1){
 			write++;
 		}
 
+		// Set the dirty bit to zero.
 		cache.getDirty()[m.getSetNumber()][index] = 0;
 
+		// If the operation is a write, check the write back
+		// policy and update accordingly.
 		if(m.getOperationType().equals("W")){
 			checkWritePolicy(m.getSetNumber(), index);
 		}
