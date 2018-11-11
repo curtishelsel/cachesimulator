@@ -51,7 +51,7 @@ public class CacheSimulator{
 					cache.getCacheArray()[setNumber][i] = tag;
 					
 					if(cache.getRPolicy().equals("LRU")){
-						updateLRU(setNumber);
+						//updateLRU(setNumber);
 					}
 
 					if(op.equals("W")){
@@ -71,32 +71,8 @@ public class CacheSimulator{
 			if(cache.getDirty()[setNumber][0] == 1){
 				write++;
 			}
-			for(int i = 1; i < cache.getAssoc(); i++){
-				cache.getCacheArray()[setNumber][i-1] = cache.getCacheArray()[setNumber][i];
-				cache.getDirty()[setNumber][i-1] = cache.getDirty()[setNumber][i];
-			}		
-			
-			cache.getCacheArray()[setNumber][cache.getCacheArray()[setNumber].length-1] = tag;
-			
-			if(cache.getWBPolicy() && op.equals("W")){
+						if(cache.getWBPolicy() && op.equals("W")){
 				
-			}
-
-		}
-		if(cache.getRPolicy().equals("LRU")){
-		
-			int index = updateLRU(setNumber);
-
-			if(cache.getDirty()[setNumber][index] == 1){
-				write++;
-			}
-			cache.getCacheArray()[setNumber][index] = tag;
-
-			if(op.equals("W")){
-				cache.getDirty()[setNumber][index] = 1;
-			}
-			else{
-				cache.getDirty()[setNumber][index] = 0;
 			}
 
 		}
@@ -130,6 +106,16 @@ public class CacheSimulator{
 
 	}
 
+	public void addFifo(MemoryAccess m){
+	
+		for(int i = 1; i < cache.getAssoc(); i++){
+			cache.getCacheArray()[m.getSetNumber()][i-1] = cache.getCacheArray()[m.getSetNumber()][i];
+		}		
+			
+		cache.getCacheArray()[m.getSetNumber()][cache.getCacheArray()[m.getSetNumber()].length-1] = m.getTag();
+
+	}
+
 	public void simulate(MemoryAccess m){
 		
 		for(int i = 0; i < cache.getAssoc(); i++){
@@ -154,6 +140,9 @@ public class CacheSimulator{
 			addLRU(m);
 		}
 
+		if(cache.getRPolicy().equals("FIFO")){
+			addFifo(m);
+		}
 	}
 
 	public static void main(String[] args){
@@ -165,10 +154,7 @@ public class CacheSimulator{
 
 		CacheSimulator cs = new CacheSimulator(args);
 
-		
-
-
-		System.out.println(cs.write);
+		System.out.println((double) cs.miss/(cs.miss + cs.hit));
 		//print statistics
 	}
 }
