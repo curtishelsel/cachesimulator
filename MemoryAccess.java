@@ -20,18 +20,15 @@ public class MemoryAccess{
 		return address;
 	}
 
-	public void setSetNumber(int blockSize){
+	public void setSetNumberAndTag(int blockSize, int numSets){
 		BigInteger bs = BigInteger.valueOf((long) blockSize);
 		BigInteger tagIndex = address.divide(bs);
-		setNumber = tagIndex.mod(bs).intValue();
+		setNumber = tagIndex.mod(BigInteger.valueOf((long) numSets)).intValue();
+		tag = tagIndex.divide(BigInteger.valueOf((long) numSets));
 	}
 
 	public int getSetNumber(){
 		return setNumber;
-	}
-
-	public void setTag(int numSets){
-		tag = address.divide(BigInteger.valueOf((long) numSets));
 	}
 
 	public BigInteger getTag(){

@@ -36,8 +36,7 @@ public class CacheSimulator{
 				MemoryAccess m = new MemoryAccess(op, add);
 				
 				// Set the set number and tag for each memory access.
-				m.setSetNumber(cache.getBlockSize());
-				m.setTag(cache.getNumSets());
+				m.setSetNumberAndTag(cache.getBlockSize(), cache.getNumSets());
 			
 				simulate(m);
 			}
@@ -179,7 +178,7 @@ public class CacheSimulator{
 	}
 
 	public void printStatistics(){
-		System.out.println("Miss Ratio: " + (float) miss/(miss + hit));
+		System.out.println("Miss Ratio: " + (double) miss/(miss + hit));
 		System.out.println("Number of writes: " + write);
 		System.out.println("Number of reads: " + read);
 	}
