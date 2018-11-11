@@ -100,22 +100,34 @@ public class CacheSimulator{
 		}
 	}
 
+	// Method to add memory access based on first in first out
+	// replacement policy.
 	public void addFifo(MemoryAccess m){
 	
+		// For write-back, if the previous tag was a write,
+		// write the data back to memory. For write-through,
+		// all the dirty bits are automatically set to zero and
+		// will never increment the writes.
 		if(cache.getDirty()[m.getSetNumber()][0] == 1){
 			write++;
 		}
 
+		// Shift all tags down in the Cache and dirty bit array 
+		// so the first one in is the first one out. 
 		for(int i = 1; i < cache.getAssoc(); i++){
 			cache.getCacheArray()[m.getSetNumber()][i-1] = cache.getCacheArray()[m.getSetNumber()][i];
 			cache.getDirty()[m.getSetNumber()][i-1] = cache.getDirty()[m.getSetNumber()][i];
 		}		
-			
-		cache.getCacheArray()[m.getSetNumber()][cache.
-			getCacheArray()[m.getSetNumber()].length-1] = m.getTag();
+		
+		// Update the cache with the new tag at the last location
+		cache.getCacheArray()[m.getSetNumber()][cache.getCacheArray()[m.getSetNumber()].length-1] = m.getTag();
 
+		// Set the dirty bit to zero. This will be updated if 
+		// the operation type is a write.
 		cache.getDirty()[m.getSetNumber()][cache.getCacheArray()[m.getSetNumber()].length-1] = 0; 
 		
+		// If the operation is a write, check the write back
+		// policy and update accordingly.
 		if(m.getOperationType().equals("W")){
 			checkWritePolicy(m.getSetNumber(), cache.getCacheArray()[m.getSetNumber()].length-1);
 		}
