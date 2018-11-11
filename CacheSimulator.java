@@ -133,10 +133,16 @@ public class CacheSimulator{
 		}
 	}
 
+	// Method checks the write-back policy of the cache.
 	void checkWritePolicy(int setNumber, int index){
+		// If the write-back policy is a write-back,
+		// set the dirty bit to 1 to be updated next time
+		// it is removed from the cache.
 		if(cache.getWBPolicy()){
 			cache.getDirty()[setNumber][index] = 1;
 		}
+		// If the write-back policy is a write-throug,
+		// immediately write to memory.
 		else{
 			write++;
 		}
