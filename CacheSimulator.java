@@ -12,7 +12,6 @@ import java.math.*;
 
 public class CacheSimulator{
 
-	private List<MemoryAccess> memAcc;
 	private Cache cache;
 	private int hit;
 	private int miss;
@@ -21,7 +20,6 @@ public class CacheSimulator{
 
 	public CacheSimulator (String[] args){
 
-		memAcc = new ArrayList<MemoryAccess>();
 		cache = new Cache(args[0], args[1], args[2], args[3]);
 		
 		try{
@@ -43,34 +41,6 @@ public class CacheSimulator{
 		catch(FileNotFoundException ex){
 			System.out.println(ex.toString());
 		}
-	}
-
-	public int updateLRU(int setNumber){
-	
-		int index = 0;
-		int min = (int) cache.getAssoc();
-
-		for(int i = 0; i < cache.getAssoc(); i++){
-			if(cache.getReplace()[setNumber][i] < min){
-				min = cache.getReplace()[setNumber][i];
-				index = i;
-			}
-			cache.getReplace()[setNumber][i]--;
-		}
-
-		cache.getReplace()[setNumber][index] = (int) cache.getAssoc() - 1;
-
-		if(setNumber == 6){
-			for(int i = 0; i < cache.getNumSets(); i++){
-
-		    	for(int j = 0; j < cache.getAssoc(); j++){
-		    		System.out.print(cache.getReplace()[i][j] + " "); 
-				}
-				System.out.println();
-        	}
-		}
-		return index;
-		
 	}
 
 	public void updateCache(int setNumber, BigInteger tag, String op){
@@ -132,27 +102,69 @@ public class CacheSimulator{
 		}
 	}
 
+	public int updateLRU(int setNumber){
+	
+		int index = 0;
+		int min = (int) cache.getAssoc();
+
+		for(int i = 0; i < cache.getAssoc(); i++){
+			if(cache.getReplace()[setNumber][i] < min){
+				min = cache.getReplace()[setNumber][i];
+				index = i;
+			}
+			cache.getReplace()[setNumber][i]--;
+		}
+
+		cache.getReplace()[setNumber][index] = (int) cache.getAssoc() - 1;
+
+		if(setNumber == 6){
+			for(int i = 0; i < cache.getNumSets(); i++){
+
+		    	for(int j = 0; j < cache.getAssoc(); j++){
+		    		System.out.print(cache.getReplace()[i][j] + " "); 
+				}
+				System.out.println();
+        	}
+		}
+		return index;
+		
+	}
+
+	public void LRU(int index, int setNumber){
+
+		for(int j = 0; j < cache.getAssoc(); j++){
+			cache.getReplace()[setNumber][j]--;
+		}	
+		
+		cache.getReplace()[setNumber][index] = cache.getReplace()[setNumber].length - 1;
+		
+
+	}
+	
 	public void simulate(MemoryAccess m){
 		
 		int setNumber = m.getSetNumber();
-		BigInteger tag = m.getTag();
 
-		for(int j = 0; j < cache.getAssoc(); j++){
+		for(int i = 0; i < cache.getAssoc(); i++){
 			
-			if(tag.equals(cache.getCacheArray()[setNumber][j])){
+			if(m.getTag().equals(cache.getCacheArray()[setNumber][i])){
+			
 				hit++;
-				// update lru
-				// update dirty bit
-				break;
+
+				if(cache.getRPolicy().equals("LRU")){
+					LRU(i, setNumber);
+				}
+
+				//dirty bit
+				return;
 			}
-			else if(j == cache.getAssoc()-1){
-				miss++;
-				read++;
-				updateCache(setNumber, tag, m.getOperationType());
-			}	
 		}
 			
+		miss++;
+		read++;
+		updateCache(setNumber, m.getTag(), m.getOperationType());
 	}
+
 	public static void main(String[] args){
 		
 		if(args.length != 5){
