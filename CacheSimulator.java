@@ -43,41 +43,6 @@ public class CacheSimulator{
 		}
 	}
 
-	public void updateCache(int setNumber, BigInteger tag, String op){
-		
-		
-		for(int i = 0; i < cache.getAssoc(); i++){
-				if(cache.getCacheArray()[setNumber][i] == null){
-					cache.getCacheArray()[setNumber][i] = tag;
-					
-					if(cache.getRPolicy().equals("LRU")){
-						//updateLRU(setNumber);
-					}
-
-					if(op.equals("W")){
-						cache.getDirty()[setNumber][i] = 1;		
-					}
-					else{
-						cache.getDirty()[setNumber][i] = 0;
-					}
-
-					return;
-				}
-		}
-
-		if(cache.getRPolicy().equals("FIFO")){
-			
-
-			if(cache.getDirty()[setNumber][0] == 1){
-				write++;
-			}
-						if(cache.getWBPolicy() && op.equals("W")){
-				
-			}
-
-		}
-	}
-
 	public void LRU(int index, int setNumber){
 
 		for(int j = 0; j < cache.getAssoc(); j++){
@@ -86,7 +51,6 @@ public class CacheSimulator{
 		
 		cache.getReplace()[setNumber][index] = cache.getReplace()[setNumber].length - 1;
 	}
-	
 
 	public void addLRU(MemoryAccess m){
 		
@@ -101,9 +65,11 @@ public class CacheSimulator{
 		}
 
 		LRU(index, m.getSetNumber());
-
 		cache.getCacheArray()[m.getSetNumber()][index] = m.getTag();
 
+		if(m.getOperationType().equals("W")){
+			checkWritePolicy();
+		}
 	}
 
 	public void addFifo(MemoryAccess m){
@@ -112,8 +78,21 @@ public class CacheSimulator{
 			cache.getCacheArray()[m.getSetNumber()][i-1] = cache.getCacheArray()[m.getSetNumber()][i];
 		}		
 			
-		cache.getCacheArray()[m.getSetNumber()][cache.getCacheArray()[m.getSetNumber()].length-1] = m.getTag();
+		cache.getCacheArray()[m.getSetNumber()][cache.
+			getCacheArray()[m.getSetNumber()].length-1] = m.getTag();
 
+		if(m.getOperationType().equals("W")){
+			checkWritePolicy();
+		}
+	}
+
+	void checkWritePolicy(){
+		if(cache.getWBPolicy()){
+			read++;
+		}
+		else{
+			write++;
+		}
 	}
 
 	public void simulate(MemoryAccess m){
@@ -123,11 +102,13 @@ public class CacheSimulator{
 			if(m.getTag().equals(cache.getCacheArray()[m.getSetNumber()][i])){
 			
 				hit++;
-
 				if(cache.getRPolicy().equals("LRU")){
 					LRU(i, m.getSetNumber());
 				}
 
+				if(m.getOperationType().equals("W")){
+					checkWritePolicy();
+				}
 				//dirty bit
 				return;
 			}
@@ -145,6 +126,13 @@ public class CacheSimulator{
 		}
 	}
 
+	public void printStatistics(){
+		
+		System.out.println((double) miss/(miss + hit));
+		System.out.println(write);
+		System.out.println(read);
+	}
+
 	public static void main(String[] args){
 		
 		if(args.length != 5){
@@ -154,7 +142,6 @@ public class CacheSimulator{
 
 		CacheSimulator cs = new CacheSimulator(args);
 
-		System.out.println((double) cs.miss/(cs.miss + cs.hit));
-		//print statistics
+		cs.printStatistics();
 	}
 }
