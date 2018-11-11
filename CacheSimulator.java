@@ -102,34 +102,6 @@ public class CacheSimulator{
 		}
 	}
 
-	public int updateLRU(int setNumber){
-	
-		int index = 0;
-		int min = (int) cache.getAssoc();
-
-		for(int i = 0; i < cache.getAssoc(); i++){
-			if(cache.getReplace()[setNumber][i] < min){
-				min = cache.getReplace()[setNumber][i];
-				index = i;
-			}
-			cache.getReplace()[setNumber][i]--;
-		}
-
-		cache.getReplace()[setNumber][index] = (int) cache.getAssoc() - 1;
-
-		if(setNumber == 6){
-			for(int i = 0; i < cache.getNumSets(); i++){
-
-		    	for(int j = 0; j < cache.getAssoc(); j++){
-		    		System.out.print(cache.getReplace()[i][j] + " "); 
-				}
-				System.out.println();
-        	}
-		}
-		return index;
-		
-	}
-
 	public void LRU(int index, int setNumber){
 
 		for(int j = 0; j < cache.getAssoc(); j++){
@@ -141,7 +113,21 @@ public class CacheSimulator{
 	
 
 	public void addLRU(MemoryAccess m){
-	
+		
+		int index = 0;
+		int min = (int) cache.getAssoc();
+
+		for(int i = 0; i < cache.getAssoc(); i++){
+			if(cache.getReplace()[m.getSetNumber()][i] < min){
+				min = cache.getReplace()[m.getSetNumber()][i];
+				index = i;
+			}
+		}
+
+		LRU(index, m.getSetNumber());
+
+		cache.getCacheArray()[m.getSetNumber()][index] = m.getTag();
+
 	}
 
 	public void simulate(MemoryAccess m){
