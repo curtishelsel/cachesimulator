@@ -178,6 +178,8 @@ public class CacheSimulator{
 		}
 	}
 
+	// Prints out useful statistics for miss ratio, number of writes,
+	// and number of reads for a given trace file.
 	public void printStatistics(){
 		System.out.println("Miss Ratio: " + (double) miss/(miss + hit));
 		System.out.println("Number of writes: " + write);
