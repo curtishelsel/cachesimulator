@@ -1,3 +1,10 @@
+/* Curtis Helsel
+   EEL4768 - Fall 2018
+   November 3, 2018
+
+   Class implementation of a cache
+*/
+
 import java.math.BigInteger;
 
 public class Cache{
@@ -19,15 +26,18 @@ public class Cache{
 
 		numSets = (int) (getSize() / (blockSize * getAssoc()));
 
-		cacheArray = new BigInteger[numSets][(int) this.associativity];
-		replace = new int[numSets][(int) this.associativity];
+		cacheArray = new BigInteger[numSets][(int) getAssoc()];
+		replace = new int[numSets][(int) getAssoc()];
 	
+		// Set initial values for replace array as 0-associativity
+		// for use with LRU replacement policy.
 		for(int i = 0; i < numSets; i++){
-			for(int j = 0; j < this.associativity; j++){
+			for(int j = 0; j < getAssoc(); j++){
 				replace[i][j] = j;
 			}   
 		}
-		dirty = new int[numSets][(int) this.associativity];
+
+		dirty = new int[numSets][(int) getAssoc()];
 
 		if(replacementPolicy.equals("1")){
 			this.replacementPolicy = "FIFO";

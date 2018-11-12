@@ -1,3 +1,10 @@
+/* Curtis Helsel
+   EEL4768 - Fall 2018
+   November 3, 2018
+
+   Class implementation of a memory access.
+*/
+
 import java.math.BigInteger;
 
 public class MemoryAccess{
