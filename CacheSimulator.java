@@ -48,7 +48,7 @@ public class CacheSimulator{
 
 	// Method updates the least recently used array base on
 	// index being changed.
-	public void LRU(int index, int setNumber){
+	private void LRU(int index, int setNumber){
 
 		// Decrement all of the indices recently used place
 		for(int j = 0; j < cache.getAssoc(); j++){
@@ -62,7 +62,7 @@ public class CacheSimulator{
 
 	// Method to add memory access based on least recently used
 	// replacement policy.
-	public void addLRU(MemoryAccess m){
+	private void addLRU(MemoryAccess m){
 		
 		int index = 0;
 		int min = (int) cache.getAssoc();
@@ -101,7 +101,7 @@ public class CacheSimulator{
 
 	// Method to add memory access based on first in first out
 	// replacement policy.
-	public void addFifo(MemoryAccess m){
+	private void addFifo(MemoryAccess m){
 	
 		// For write-back, if the previous tag was a write,
 		// write the data back to memory. For write-through,
@@ -133,7 +133,7 @@ public class CacheSimulator{
 	}
 
 	// Method checks the write-back policy of the cache.
-	void checkWritePolicy(int setNumber, int index){
+	private void checkWritePolicy(int setNumber, int index){
 		// If the write-back policy is a write-back,
 		// set the dirty bit to 1 to be updated next time
 		// it is removed from the cache.
@@ -147,28 +147,39 @@ public class CacheSimulator{
 		}
 	}
 
-	
-	public void simulate(MemoryAccess m){
+	// Method simulates a cache access for each memory access in
+	// the file provided.
+	private void simulate(MemoryAccess m){
 		
+		// For each tag in the cache array, check if it matches
+		// the tag being accessed. Hit is there is a match.
 		for(int i = 0; i < cache.getAssoc(); i++){
-			
 			if(m.getTag().equals(cache.getCacheArray()[m.getSetNumber()][i])){
 			
 				hit++;
+
+				// For least recently used policy, update the least
+				// recently used array.
 				if(cache.getRPolicy().equals("LRU")){
 					LRU(i, m.getSetNumber());
 				}
 
+				// If memory access is a write, update according
+				// to the write back policy.
 				if(m.getOperationType().equals("W")){
 					checkWritePolicy(m.getSetNumber(), i);
 				}
+
 				return;
 			}
 		}
 			
+		// If the tag is not in the cache, it is a miss and must
+		// read from memory.
 		miss++;
 		read++;
 
+		// Check the policy and add tag to the queue.
 		if(cache.getRPolicy().equals("LRU")){
 			addLRU(m);
 		}
@@ -180,7 +191,7 @@ public class CacheSimulator{
 
 	// Prints out useful statistics for miss ratio, number of writes,
 	// and number of reads for a given trace file.
-	public void printStatistics(){
+	private void printStatistics(){
 		System.out.println("Miss Ratio: " + (double) miss/(miss + hit));
 		System.out.println("Number of writes: " + write);
 		System.out.println("Number of reads: " + read);
